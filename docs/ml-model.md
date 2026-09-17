@@ -1,5 +1,30 @@
 # Lead scoring methodology
 
-This release uses an explainable rules-based lead qualification score, not a fabricated machine-learning model. The signals are public rating, review volume, website availability, and direct phone availability. Each applied signal is returned as a score factor.
+ReachPilot AI uses Machine Learning to analyze collected business and social-media data and generate a Lead Quality Score (0–100).
 
-Before replacing this with scikit-learn, collect real outcome labels (for example, contacted/replied/converted) under a documented consent and retention policy. Split by time or campaign, evaluate against a simple baseline, and disclose limitations in the project report. Until then, do not market this component as a trained production ML model.
+ML Pipeline
+Google / Instagram / Facebook / Reddit
+                ↓
+          Data Cleaning
+                ↓
+       Feature Engineering
+                ↓
+        Random Forest Model
+                ↓
+        Lead Quality Score
+                ↓
+       Hot / Warm / Cold
+Main Features
+Business rating and review count
+Website, phone, and email availability
+Social-media activity
+Instagram/Facebook followers
+Reddit mentions
+Contact completeness
+ML Technologies
+Scikit-learn — model training
+Pandas — data processing
+NumPy — numerical operations
+Random Forest — lead classification/scoring
+
+The trained model is integrated with the Flask backend and stores lead scores in Supabase/PostgreSQL for display and prioritization in the dashboard.

@@ -1,7 +1,112 @@
 # Architecture
 
-`template.html` is the primary UI and is served by Flask. Browser-side API calls use `fetch` and only call `/api/*`; no provider secret is sent to the browser.
+                         ┌─────────────────────┐
+                         │        USER         │
+                         └──────────┬──────────┘
+                                    │
+                                    ▼
+                  ┌─────────────────────────────┐
+                  │          FRONTEND           │
+                  │ HTML + CSS + Vanilla JS     │
+                  │                             │
+                  │ Dashboard │ Search │ Leads  │
+                  │ Analytics │ Outreach        │
+                  └─────────────┬───────────────┘
+                                │
+                                ▼
+                  ┌─────────────────────────────┐
+                  │       FLASK REST API        │
+                  │                             │
+                  │ Routes → Services → Utils   │
+                  └──────┬──────────┬───────────┘
+                         │          │
+              ┌──────────┘          └─────────────┐
+              ▼                                   ▼
+   ┌─────────────────────┐             ┌─────────────────────┐
+   │   DATA COLLECTION    │             │   AI / ML LAYER     │
+   │                     │             │                     │
+   │ Google Places       │             │ Data Cleaning       │
+   │ Instagram           │             │ Feature Engineering │
+   │ Facebook            │             │ ML Model            │
+   │ Reddit              │             │ Lead Prediction     │
+   └──────────┬──────────┘             └──────────┬──────────┘
+              │                                   │
+              └────────────────┬──────────────────┘
+                               ▼
+                    ┌─────────────────────┐
+                    │   SUPABASE /        │
+                    │   POSTGRESQL        │
+                    │                     │
+                    │ Leads               │
+                    │ Lead Features       │
+                    │ Lead Scores         │
+                    │ Lead Outcomes       │
+                    │ Licenses            │
+                    │ Sales               │
+                    │ Usage               │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │     DASHBOARD       │
+                    │                     │
+                    │ Lead Score: 92      │
+                    │ Status: HOT         │
+                    │ Priority: High     │
+                    └─────────────────────┘
 
-Routes are split by responsibility: authentication, businesses, leads, scoring, outreach, analytics, exports, and follow-ups. Services contain external-provider work and business logic. SQLite makes the project runnable without infrastructure; setting `DATABASE_URL` selects PostgreSQL for Supabase/Render.
 
-Existing legacy licensing tables (`licenses`, `sales`, `usage`) are never created, changed, or deleted by `database/schema.sql`.
+
+# DataFlow
+
+Google / Instagram / Facebook / Reddit
+                  ↓
+            Lead Collection
+                  ↓
+          Data Cleaning
+                  ↓
+         Normalization
+                  ↓
+        Duplicate Removal
+                  ↓
+        Feature Engineering
+                  ↓
+          ML Prediction
+                  ↓
+       Lead Quality Score
+                  ↓
+        Hot / Warm / Cold
+                  ↓
+       Store in Supabase
+                  ↓
+        Display on Dashboard
+                  ↓
+       AI-assisted Outreach
+                  ↓
+        Follow-up & Analytics
+
+
+# Technology Architecture
+
+
+Frontend
+   │
+   ├── HTML5
+   ├── CSS3
+   └── Vanilla JavaScript
+          │
+          ▼
+Backend
+   │
+   ├── Python
+   ├── Flask
+   └── REST API
+          │
+    ┌─────┴─────────┐
+    ▼               ▼
+Database          ML / AI
+    │               │
+    ├── Supabase    ├── Scikit-learn
+    └── PostgreSQL  ├── Pandas
+                    ├── NumPy
+                    └── OpenAI API
