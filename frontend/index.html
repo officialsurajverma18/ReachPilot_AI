@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReachPilot AI - Glassmorphism Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    animation: {
+                        blob: "blob 7s infinite",
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        blob: {
+                            "0%": { transform: "translate(0px, 0px) scale(1)" },
+                            "33%": { transform: "translate(30px, -50px) scale(1.1)" },
+                            "66%": { transform: "translate(-20px, 20px) scale(0.9)" },
+                            "100%": { transform: "translate(0px, 0px) scale(1)" },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="css/template-source.css">
+    <link rel="stylesheet" href="css/template-responsive.css?v=4">
+</head>
+<body class="h-screen flex overflow-hidden" data-theme="blue">
+    <button id="mobile-menu-toggle" class="mobile-menu-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+    </button>
+    <div id="mobile-menu-backdrop" class="mobile-menu-backdrop" aria-hidden="true"></div>
+
+    <!-- Animated Background Blobs -->
+    <div class="fixed inset-0 -z-10 overflow-hidden">
+        <div class="absolute top-[-10%] left-[-10%] w-96 h-96 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-70 animate-blob" style="background-color: var(--blob-1);"></div>
+        <div class="absolute top-[-10%] right-[-10%] w-96 h-96 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-70 animate-blob animation-delay-2000" style="background-color: var(--blob-2);"></div>
+        <div class="absolute bottom-[-20%] left-[20%] w-96 h-96 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-70 animate-blob animation-delay-4000" style="background-color: var(--blob-3);"></div>
+    </div>
+
+    <!-- ================= AUTH SCREEN (Initial View) ================= -->
+    <div id="auth-view" class="fixed inset-0 z-50 flex items-center justify-center bg-black/20 dark:bg-black/40 backdrop-blur-sm transition-opacity duration-500">
+        <div class="glass-panel w-full max-w-md p-8 relative overflow-hidden">
+            <!-- Logo & Header -->
+            <div class="flex flex-col items-center mb-8">
+                <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-3xl font-bold shadow-lg mb-4" style="background: linear-gradient(135deg, var(--accent), var(--accent-hover));">R</div>
+                <h2 class="text-2xl font-bold">ReachPilot AI</h2>
+                <p class="text-sm text-[var(--text-muted)]">Glass Workspace for AI Lead Generation</p>
+            </div>
+
+            <!-- Step 1: Login -->
+                <div id="auth-step-1" class="auth-step active">
+                <p class="text-xs font-bold text-center text-[var(--text-muted)] mb-6 tracking-widest">STEP 1 OF 2 · LOGIN</p>
+                <div class="mb-4 text-left">
+                    <label class="block text-sm font-medium mb-2">Purchase Email</label>
+                    <input id="purchase-email" type="email" placeholder="you@business.com" class="glass-input w-full" autocomplete="email">
+                    <p class="text-xs text-[var(--text-muted)] mt-2">This email must match the one used at checkout.</p>
+                </div>
+                <p id="license-message" class="hidden text-xs text-red-400 mb-3" role="alert"></p>
+                <button onclick="nextAuthStep()" class="glass-button-primary w-full mt-4">Continue to Activation</button>
+                <button id="open-signup" type="button" class="glass-button-secondary w-full mt-3 text-[var(--accent)] border-[var(--accent)]">Create a new account</button>
+            </div>
+
+            <!-- Sign-up: shown when the visitor does not already have an account. -->
+            <div id="auth-step-signup" class="auth-step">
+                <p class="text-xs font-bold text-center text-[var(--text-muted)] mb-6 tracking-widest">CREATE YOUR ACCOUNT</p>
+                <div class="mb-3 text-left">
+                    <label class="block text-sm font-medium mb-2">Your Name</label>
+                    <input id="signup-name" type="text" placeholder="Your name" class="glass-input w-full" autocomplete="name">
+                </div>
+                <div class="mb-3 text-left">
+                    <label class="block text-sm font-medium mb-2">Email Address</label>
+                    <input id="signup-email" type="email" placeholder="you@business.com" class="glass-input w-full" autocomplete="email">
+                </div>
+                <div class="mb-3 text-left">
+                    <label class="block text-sm font-medium mb-2">Password</label>
+                    <input id="signup-password" type="password" placeholder="Create a password" class="glass-input w-full" autocomplete="new-password">
+                </div>
+                <p id="signup-message" class="hidden text-xs text-red-400 mb-3" role="alert"></p>
+                <button id="signup-button" type="button" class="glass-button-primary w-full mt-2">Create Account</button>
+                <button id="back-to-login" type="button" class="glass-button-secondary w-full mt-3 text-[var(--text-muted)]">← Back to Login</button>
+            </div>
+
+            <!-- Step 2: Activation -->
+            <div id="auth-step-2" class="auth-step">
+                <p class="text-xs font-bold text-center text-[var(--text-muted)] mb-6 tracking-widest">STEP 2 OF 2 · ACTIVATION</p>
+                <div class="mb-4 text-left">
+                    <label class="block text-sm font-medium mb-2">Activation Key</label>
+                    <input id="activation-key" type="text" placeholder="Enter activation key" class="glass-input w-full" autocomplete="off">
+                </div>
+                <button onclick="mockActivate()" class="glass-button-primary w-full mb-3">Activate</button>
+                <button id="find-key-button" type="button" class="glass-button-secondary w-full mb-4 text-[var(--accent)] border-[var(--accent)]">Find My Key from Email</button>
+                <p id="activation-message" class="hidden text-xs text-red-400 mb-3" role="alert"></p>
+                <p class="text-xs text-center text-[var(--text-muted)] mb-6">Enter the key sent after purchase.</p>
+                <button onclick="prevAuthStep()" class="glass-button-secondary w-full text-[var(--text-muted)]">← Back to Login</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MAIN APP (Hidden until auth) ================= -->
+    <div id="app-view" class="hidden w-full h-full flex overflow-hidden">
+        
+        <!-- SIDEBAR -->
+        <aside class="w-64 m-4 glass-panel flex flex-col flex-shrink-0 z-10">
+            <!-- Logo -->
+            <div class="p-6 flex items-center gap-3 border-b border-[var(--border-panel)]">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white text-xl shadow-lg" style="background: linear-gradient(135deg, var(--accent), var(--accent-hover));">R</div>
+                <div>
+                    <h1 class="font-bold text-sm tracking-wide">ReachPilot</h1>
+                    <p class="text-[10px] text-[var(--text-muted)]">Revenue Workspace</p>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+                <p class="px-3 text-[10px] font-bold text-[var(--text-muted)] mb-2 tracking-widest">NAVIGATION</p>
+                
+                <button onclick="switchTab('dashboard')" class="sidebar-item active w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-white/30 dark:hover:bg-white/10 transition-colors" data-tab="dashboard">
+                    <span>⌂</span> Dashboard
+                </button>
+                <button onclick="switchTab('leads')" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-white/30 dark:hover:bg-white/10 transition-colors" data-tab="leads">
+                    <span>⊞</span> Leads
+                </button>
+                <button onclick="switchTab('generate')" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-white/30 dark:hover:bg-white/10 transition-colors" data-tab="generate">
+                    <span>⊕</span> Generate
+                </button>
+                <button onclick="switchTab('find-emails')" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-white/30 dark:hover:bg-white/10 transition-colors" data-tab="find-emails">
+                    <span>◉</span> Find Emails
+                </button>
+                <button onclick="switchTab('ai-compose')" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-white/30 dark:hover:bg-white/10 transition-colors" data-tab="ai-compose">
+                    <span>✦</span> AI Compose
+                </button>
+                <button onclick="switchTab('whatsapp')" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-white/30 dark:hover:bg-white/10 transition-colors" data-tab="whatsapp">
+                    <span>◎</span> WhatsApp
+                </button>
+                <button onclick="switchTab('email')" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-white/30 dark:hover:bg-white/10 transition-colors" data-tab="email">
+                    <span>✈</span> Email
+                </button>
+                
+                <p class="px-3 text-[10px] font-bold text-[var(--text-muted)] mt-6 mb-2 tracking-widest">MANAGE</p>
+                
+                <button onclick="switchTab('tracker')" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-white/30 dark:hover:bg-white/10 transition-colors" data-tab="tracker">
+                    <span>≡</span> Tracker
+                </button>
+                <button onclick="switchTab('pipeline')" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-white/30 dark:hover:bg-white/10 transition-colors" data-tab="pipeline">
+                    <span>◫</span> Pipeline
+                </button>
+                <button onclick="switchTab('settings')" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-white/30 dark:hover:bg-white/10 transition-colors" data-tab="settings">
+                    <span>⚙</span> Settings
+                </button>
+                <button onclick="switchTab('history')" class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-white/30 dark:hover:bg-white/10 transition-colors" data-tab="history">
+                    <span>▸</span> History
+                </button>
+            </nav>
+
+            <!-- Footer -->
+            <div class="p-4 border-t border-[var(--border-panel)] text-[10px] text-[var(--text-muted)]">
+                <p>v7.0 · ReachPilot AI</p>
+                <p class="text-green-500 mt-1">STARTER · 2026-10-13</p>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 overflow-y-auto p-4 z-10">
+            
+            <!-- ================= DASHBOARD TAB ================= -->
+            <div id="tab-dashboard" class="tab-content active">
+                <div class="flex justify-between items-start mb-8">
+                    <div>
+                        <p class="text-[var(--text-muted)] text-sm mb-1">Good afternoon, There</p>
+                        <h2 class="text-3xl font-bold">ReachPilot Command Center</h2>
+                    </div>
+                    <div class="glass-panel px-4 py-2 text-right">
+                        <p class="font-bold text-sm" style="color: var(--accent);">⚡ 1000/1000 credits left</p>
+                        <p class="text-[var(--text-muted)] text-xs mt-1">17 Sep 15:32</p>
+                    </div>
+                </div>
+
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-6 gap-4 mb-8">
+                    <div class="glass-panel p-5">
+                        <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-2">Total Leads</p>
+                        <p id="kpi-total" class="text-3xl font-bold">0</p>
+                    </div>
+                    <div class="glass-panel p-5">
+                        <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-2">Emails Found</p>
+                        <p class="text-3xl font-bold">0</p>
+                    </div>
+                    <div class="glass-panel p-5">
+                        <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-2">Messages Ready</p>
+                        <p class="text-3xl font-bold">0</p>
+                    </div>
+                    <div class="glass-panel p-5">
+                        <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-2">WhatsApp Sent</p>
+                        <p class="text-3xl font-bold">0</p>
+                    </div>
+                    <div class="glass-panel p-5">
+                        <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-2">Closed Revenue</p>
+                        <p class="text-3xl font-bold">—</p>
+                    </div>
+                    <div class="glass-panel p-5">
+                        <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-2">Potential Revenue</p>
+                        <p class="text-3xl font-bold">—</p>
+                    </div>
+                </div>
+
+                <!-- Start Here Bar -->
+                <div class="glass-panel p-4 flex justify-between items-center mb-8 border-l-4" style="border-color: var(--accent);">
+                    <p class="text-sm font-bold">START HERE · Generate leads, enrich contacts, write messages, then send.</p>
+                    <button onclick="switchTab('generate')" class="glass-button-primary text-sm">Continue Workflow</button>
+                </div>
+
+                <!-- Bottom Grid -->
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="glass-panel p-6">
+                        <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-4">Pipeline</p>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-4 p-3 hover:bg-white/30 dark:hover:bg-white/10 rounded-xl cursor-pointer transition-colors border border-transparent hover:border-[var(--border-panel)]" onclick="switchTab('generate')">
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs" style="background-color: var(--accent); color: white;">⊕</div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-bold">Generate Leads</p>
+                                    <p class="text-[var(--text-muted)] text-xs">Scrape Google Maps by niche + city</p>
+                                </div>
+                                <span class="text-[var(--text-muted)]">›</span>
+                            </div>
+                            <div class="flex items-center gap-4 p-3 hover:bg-white/30 dark:hover:bg-white/10 rounded-xl cursor-pointer transition-colors border border-transparent hover:border-[var(--border-panel)]" onclick="switchTab('find-emails')">
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs" style="background-color: var(--accent); color: white;">◉</div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-bold">Find Emails</p>
+                                    <p class="text-[var(--text-muted)] text-xs">Auto-scan websites for contacts</p>
+                                </div>
+                                <span class="text-[var(--text-muted)]">›</span>
+                            </div>
+                            <div class="flex items-center gap-4 p-3 hover:bg-white/30 dark:hover:bg-white/10 rounded-xl cursor-pointer transition-colors border border-transparent hover:border-[var(--border-panel)]" onclick="switchTab('ai-compose')">
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs" style="background-color: var(--accent); color: white;">✦</div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-bold">AI Compose</p>
+                                    <p class="text-[var(--text-muted)] text-xs">GPT writes personalised messages</p>
+                                </div>
+                                <span class="text-[var(--text-muted)]">›</span>
+                            </div>
+                            <div class="flex items-center gap-4 p-3 hover:bg-white/30 dark:hover:bg-white/10 rounded-xl cursor-pointer transition-colors border border-transparent hover:border-[var(--border-panel)]" onclick="switchTab('whatsapp')">
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs" style="background-color: var(--accent); color: white;">◎</div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-bold">WhatsApp</p>
+                                    <p class="text-[var(--text-muted)] text-xs">Send via WhatsApp Web auto-pilot</p>
+                                </div>
+                                <span class="text-[var(--text-muted)]">›</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="glass-panel p-6">
+                            <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-2">Start Here</p>
+                            <p class="text-[var(--text-muted)] text-xs mb-4">Follow this workflow to move from fresh leads to outreach without guessing the next step.</p>
+                            <div class="space-y-2">
+                                <button class="w-full text-left glass-button-secondary text-sm">1. Generate Leads</button>
+                                <button class="w-full text-left glass-button-secondary text-sm">2. Find Emails</button>
+                                <button class="w-full text-left glass-button-secondary text-sm">3. Write Messages</button>
+                                <button class="w-full text-left glass-button-secondary text-sm">4. Send Outreach</button>
+                            </div>
+                            <button onclick="switchTab('generate')" class="w-full glass-button-primary mt-4">Continue Workflow</button>
+                            <div class="mt-4 text-xs text-[var(--text-muted)]">
+                                <p>Credits used this month: 0/1000 · 1000 left · 0% used</p>
+                                <div class="w-full bg-gray-300 dark:bg-gray-700 h-2 rounded-full mt-2"><div class="h-2 rounded-full" style="width: 0%; background-color: var(--accent);"></div></div>
+                            </div>
+                        </div>
+
+                        <div class="glass-panel p-6">
+                            <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-4">Today's Activity</p>
+                            <div class="text-[var(--text-muted)] text-sm space-y-3">
+                                <p>No activity yet</p>
+                                <p>No activity yet</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= LEADS TAB ================= -->
+            <div id="tab-leads" class="tab-content">
+                <h2 class="text-3xl font-bold mb-2">Leads</h2>
+                <p class="text-[var(--text-muted)] text-sm mb-6">Search, identify, preview, and act on every lead</p>
+                
+                <div class="flex justify-between items-center mb-4">
+                    <p class="text-[var(--text-muted)] text-sm">0 leads</p>
+                    <div class="flex gap-2">
+                        <button class="glass-button-secondary text-[var(--accent)]">Export CSV</button>
+                        <button class="glass-button-secondary">Upload CSV</button>
+                        <button class="glass-button-secondary">Refresh</button>
+                        <button class="glass-button-secondary text-red-500">Delete Selected</button>
+                        <button class="glass-button-secondary text-red-500">Clear All</button>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 mb-4">
+                    <input type="text" placeholder="Search by business, phone, email..." class="glass-input flex-1 text-sm">
+                    <button class="glass-button-secondary">Clear Search</button>
+                    <label class="flex items-center gap-2 text-sm text-[var(--text-muted)] glass-input cursor-pointer py-2">
+                        <input type="checkbox" class="accent-[var(--accent)] rounded"> Hide Chains
+                    </label>
+                    <label class="flex items-center gap-2 text-sm text-[var(--text-muted)] glass-input cursor-pointer py-2">
+                        <input type="checkbox" class="accent-[var(--accent)] rounded"> Only Independent
+                    </label>
+                    <input type="number" placeholder="Min Rev" class="glass-input w-24 text-sm">
+                    <input type="number" placeholder="Max Rev" class="glass-input w-24 text-sm">
+                </div>
+
+                <div class="glass-panel overflow-hidden mb-4">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-white/30 dark:bg-black/30 text-[var(--text-muted)] text-xs uppercase border-b border-[var(--border-panel)]">
+                            <tr>
+                                <th class="px-4 py-3">Business Name</th>
+                                <th class="px-4 py-3">Rating</th>
+                                <th class="px-4 py-3">Reviews</th>
+                                <th class="px-4 py-3">Fit</th>
+                                <th class="px-4 py-3">Phone</th>
+                                <th class="px-4 py-3">Email</th>
+                                <th class="px-4 py-3">Website</th>
+                                <th class="px-4 py-3">Google Link</th>
+                                <th class="px-4 py-3">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leads-table-body" class="text-[var(--text-main)]">
+                            <tr>
+                                <td colspan="9" class="px-4 py-8 text-center text-[var(--text-muted)]">No leads generated yet. Go to Generate tab to start.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="glass-panel p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <p class="text-[var(--text-muted)] text-xs font-bold uppercase">Lead Details</p>
+                        <div class="flex gap-2">
+                            <button class="glass-button-secondary text-xs">Expand Details</button>
+                            <button class="glass-button-secondary text-xs">Open Floating Details</button>
+                        </div>
+                    </div>
+                    <p class="font-bold mb-4">Select a lead to preview full details.</p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-black/10 dark:bg-black/20 border border-[var(--border-panel)] rounded-xl p-4 h-32 flex items-center justify-center text-[var(--text-muted)] text-sm">
+                            Business info, website, address, and status appear here.
+                        </div>
+                        <div class="bg-black/10 dark:bg-black/20 border border-[var(--border-panel)] rounded-xl p-4 h-32 flex items-center justify-center text-[var(--text-muted)] text-sm">
+                            No AI message yet.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= GENERATE TAB ================= -->
+            <div id="tab-generate" class="tab-content">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h2 class="text-3xl font-bold mb-2">Generate Leads</h2>
+                        <p class="text-[var(--text-muted)] text-sm">Scrape Google Maps by niche + city</p>
+                    </div>
+                    <button onclick="mockGenerate()" id="generate-btn" class="glass-button-primary">Start Scraping</button>
+                </div>
+
+                <div class="glass-panel p-6 mb-6">
+                    <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-4">Search Parameters</p>
+                    <div class="grid grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label class="block text-[var(--text-muted)] text-sm mb-2">Niche</label>
+                            <input type="text" id="gen-niche" value="Dentists" class="glass-input w-full">
+                        </div>
+                        <div>
+                            <label class="block text-[var(--text-muted)] text-sm mb-2">City</label>
+                            <input type="text" id="gen-city" value="Kanpur" class="glass-input w-full">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label class="block text-[var(--text-muted)] text-sm mb-2">How many leads?</label>
+                            <input type="number" id="gen-limit" value="50" class="glass-input w-full">
+                        </div>
+                        <div>
+                            <label class="block text-[var(--text-muted)] text-sm mb-2">Mode</label>
+                            <div class="flex gap-4 mt-3">
+                                <label class="flex items-center gap-2 text-sm"><input type="radio" name="mode" checked class="accent-[var(--accent)]"> Add to existing</label>
+                                <label class="flex items-center gap-2 text-sm"><input type="radio" name="mode" class="accent-[var(--accent)]"> Replace all</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-[var(--text-muted)] text-sm mb-2">Client Tier</label>
+                        <input type="range" min="0" max="2" value="1" class="w-full accent-[var(--accent)]">
+                        <div class="flex justify-between text-xs text-[var(--text-muted)] mt-1">
+                            <span>Budget</span>
+                            <span>Mid Market</span>
+                            <span>Premium</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 flex-wrap">
+                        <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked class="accent-[var(--accent)] rounded"> Hide Chains</label>
+                        <label class="flex items-center gap-2 text-sm"><input type="checkbox" class="accent-[var(--accent)] rounded"> Only Independent</label>
+                        <div class="flex items-center gap-2 text-sm text-[var(--text-muted)]">
+                            Min Rev <input type="number" value="20" class="glass-input w-16 py-1 text-sm">
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-[var(--text-muted)]">
+                            Max Rev <input type="number" value="400" class="glass-input w-16 py-1 text-sm">
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-[var(--text-muted)]">
+                            Target ₹ <input type="number" value="15000" class="glass-input w-20 py-1 text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-6">
+                    <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-2">Live Scrape Feed</p>
+                    <p class="text-[var(--text-muted)] text-xs mb-4">Live updates while scraping so users always see progress.</p>
+                    <div class="mb-4">
+                        <p class="text-sm font-mono mb-1" style="color: var(--accent);">Stage: <span id="gen-stage">Ready</span></p>
+                        <p class="text-sm mb-1">Current lead: <span id="gen-current">waiting</span></p>
+                        <p class="text-sm font-mono" style="color: var(--accent);">Found <span id="gen-count">0</span> of <span id="gen-total">0</span> leads</p>
+                    </div>
+                    <div class="w-full bg-gray-300 dark:bg-gray-700 h-2 rounded-full mb-4">
+                        <div id="gen-progress" class="h-2 rounded-full transition-all duration-300" style="width: 0%; background-color: var(--accent);"></div>
+                    </div>
+                    <div id="gen-console" class="bg-black/80 dark:bg-black/90 text-green-400 font-mono text-xs rounded-xl p-4 h-40 overflow-y-auto border border-gray-700/50 space-y-1">
+                        <p>[Ready] Scraper console initialized.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= FIND EMAILS TAB ================= -->
+            <div id="tab-find-emails" class="tab-content">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h2 class="text-3xl font-bold mb-2">Find Emails</h2>
+                        <p class="text-[var(--text-muted)] text-sm">Enrich leads with real contact data before you spend outreach effort</p>
+                    </div>
+                    <button onclick="mockFindEmails()" id="find-emails-btn" class="glass-button-primary">Find Emails</button>
+                </div>
+
+                <div class="glass-panel p-6 mb-6">
+                    <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-4">How It Works</p>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-center gap-2"><span class="text-green-500">✓</span> Reads leads that have a website but no email</li>
+                        <li class="flex items-center gap-2"><span class="text-green-500">✓</span> Scans homepage plus contact/about pages</li>
+                        <li class="flex items-center gap-2"><span class="text-green-500">✓</span> Falls back to search-based discovery when websites are weak</li>
+                        <li class="flex items-center gap-2"><span class="text-green-500">✓</span> Captures website context for better AI messages</li>
+                        <li class="flex items-center gap-2"><span class="text-green-500">✓</span> Safe to re-run — skips existing emails</li>
+                    </ul>
+                </div>
+
+                <div class="grid grid-cols-4 gap-4 mb-6">
+                    <div class="glass-panel p-5">
+                        <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-2">Queued</p>
+                        <p id="email-queued" class="text-3xl font-bold" style="color: var(--accent);">0</p>
+                    </div>
+                    <div class="glass-panel p-5">
+                        <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-2">Emails Found</p>
+                        <p id="email-found" class="text-3xl font-bold text-green-500">0</p>
+                    </div>
+                    <div class="glass-panel p-5">
+                        <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-2">Skipped</p>
+                        <p id="email-skipped" class="text-3xl font-bold text-yellow-500">0</p>
+                    </div>
+                    <div class="glass-panel p-5">
+                        <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-2">Context Captured</p>
+                        <p id="email-context" class="text-3xl font-bold text-cyan-500">0</p>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-6">
+                    <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-4">Live Enrichment Feed</p>
+                    <div id="email-console" class="bg-black/80 dark:bg-black/90 text-green-400 font-mono text-xs rounded-xl p-4 h-48 overflow-y-auto border border-gray-700/50 space-y-1">
+                        <p>[Ready] Email finder initialized.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= AI COMPOSE TAB ================= -->
+            <div id="tab-ai-compose" class="tab-content">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h2 class="text-3xl font-bold mb-2">AI Compose</h2>
+                        <p class="text-[var(--text-muted)] text-sm">Generate personalised outreach messages with GPT</p>
+                    </div>
+                    <button onclick="mockAICompose()" id="ai-compose-btn" class="glass-button-primary">Generate Messages</button>
+                </div>
+
+                <div class="glass-panel p-6 mb-6">
+                    <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-4">Quick Templates</p>
+                    <p class="text-[var(--text-muted)] text-xs mb-4">Click a template to load it into the editor below.</p>
+                    <div class="grid grid-cols-4 gap-3">
+                        <button onclick="setPrompt('Write a short WhatsApp message for {business} offering social media marketing. Casual, max 40 words.')" class="glass-button-secondary text-xs">💬 WhatsApp Pitch</button>
+                        <button onclick="setPrompt('Outreach to {business} offering website design. Casual and friendly. Max 40 words.')" class="glass-button-secondary text-xs">🌐 Web Design</button>
+                        <button onclick="setPrompt('WhatsApp pitch to {business} for SEO and Google ranking help. Max 40 words.')" class="glass-button-secondary text-xs">📈 SEO Offer</button>
+                        <button onclick="setPrompt('Polite follow-up for {business} who did not reply. Max 30 words.')" class="glass-button-secondary text-xs">🔁 Follow Up</button>
+                        <button onclick="setPrompt('Cold email opening for {business} about digital marketing. Professional. Max 30 words.')" class="glass-button-secondary text-xs">📧 Cold Email</button>
+                        <button onclick="setPrompt('Offer a free marketing audit to {business}. Genuine. Max 35 words.')" class="glass-button-secondary text-xs">🎁 Free Audit</button>
+                        <button onclick="setPrompt('Pitch {business} on Google Ads for more local customers. Max 40 words.')" class="glass-button-secondary text-xs">🏪 Google Ads</button>
+                        <button onclick="setPrompt('Partnership pitch to {business}. Mutual benefit. Friendly. Max 40 words.')" class="glass-button-secondary text-xs">🤝 Partnership</button>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-6 mb-6">
+                    <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-4">Prompt Editor</p>
+                    <p class="text-[var(--text-muted)] text-xs mb-2">Use {business} — gets replaced with each business name automatically.</p>
+                    <textarea id="prompt-editor" class="glass-input w-full h-24 resize-none text-sm">Write a short WhatsApp message for {business} offering social media marketing. Casual, max 40 words.</textarea>
+                    <div class="text-right text-xs text-[var(--text-muted)] mt-2">Prompt length: <span id="prompt-len">100</span> characters</div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="glass-panel p-6">
+                        <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-4">Options</p>
+                        <div class="space-y-4">
+                            <div>
+                                <p class="text-sm mb-2">Generate for:</p>
+                                <label class="flex items-center gap-2 text-sm mb-1"><input type="radio" name="gen-for" checked class="accent-[var(--accent)]"> Only leads without a message</label>
+                                <label class="flex items-center gap-2 text-sm"><input type="radio" name="gen-for" class="accent-[var(--accent)]"> All leads (overwrite)</label>
+                            </div>
+                            <label class="flex items-center gap-2 text-sm"><input type="checkbox" class="accent-[var(--accent)] rounded"> Use selected leads only</label>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-6">
+                        <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-4">Preview</p>
+                        <p class="text-[var(--text-muted)] text-xs mb-2">Preview for a sample lead</p>
+                        <div id="ai-preview" class="bg-black/10 dark:bg-black/40 border border-[var(--border-panel)] rounded-xl p-4 text-sm h-24 overflow-y-auto">
+                            Write a short WhatsApp message for Turbo Cars offering social media marketing. Casual, max 40 words.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= WHATSAPP TAB ================= -->
+            <div id="tab-whatsapp" class="tab-content">
+                <h2 class="text-3xl font-bold mb-2">WhatsApp Sender</h2>
+                <p class="text-[var(--text-muted)] text-sm mb-6">Review one lead at a time in WhatsApp Web, or auto-send safely</p>
+                
+                <div class="glass-panel p-6 mb-6">
+                    <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-4">Settings</p>
+                    <div class="grid grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label class="block text-[var(--text-muted)] text-sm mb-2">Country code (numbers only, no +)</label>
+                            <input type="text" value="91" class="glass-input w-full">
+                        </div>
+                        <div>
+                            <label class="block text-[var(--text-muted)] text-sm mb-2">Delay between messages (seconds)</label>
+                            <input type="number" value="15" class="glass-input w-full">
+                        </div>
+                    </div>
+                    <p class="text-[var(--text-muted)] text-xs mb-4">Guideline: keep this around 10–20 seconds to reduce WhatsApp risk.</p>
+                    <div class="mb-4">
+                        <p class="text-sm mb-2">Mode</p>
+                        <label class="flex items-center gap-2 text-sm mb-1"><input type="radio" name="wa-mode" class="accent-[var(--accent)]"> Review Queue (one tab, manual send)</label>
+                        <label class="flex items-center gap-2 text-sm"><input type="radio" name="wa-mode" checked class="accent-[var(--accent)]"> Auto Send</label>
+                    </div>
+                    <div class="mb-4">
+                        <p class="text-sm mb-2">Send to:</p>
+                        <label class="flex items-center gap-2 text-sm mb-1"><input type="radio" name="wa-scope" checked class="accent-[var(--accent)]"> Unsent only</label>
+                        <label class="flex items-center gap-2 text-sm"><input type="radio" name="wa-scope" class="accent-[var(--accent)]"> All leads (re-send)</label>
+                    </div>
+                    <label class="flex items-center gap-2 text-sm"><input type="checkbox" class="accent-[var(--accent)] rounded"> Use selected leads only</label>
+                </div>
+
+                <div class="glass-panel p-6">
+                    <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-4">Pre-flight Checklist</p>
+                    <div class="space-y-3">
+                        <label class="flex items-center gap-3 text-sm"><input type="checkbox" class="accent-[var(--accent)] w-4 h-4 rounded"> Chrome is open</label>
+                        <label class="flex items-center gap-3 text-sm"><input type="checkbox" checked class="accent-[var(--accent)] w-4 h-4 rounded"> WhatsApp Web is logged in (web.whatsapp.com)</label>
+                        <label class="flex items-center gap-3 text-sm"><input type="checkbox" class="accent-[var(--accent)] w-4 h-4 rounded"> Leads have phone numbers</label>
+                        <label class="flex items-center gap-3 text-sm"><input type="checkbox" class="accent-[var(--accent)] w-4 h-4 rounded"> Leads have AI messages (run AI Compose first)</label>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-[var(--border-panel)] text-sm text-[var(--text-muted)]">
+                        Sent 0 of 0 · Next batch in --:--
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= EMAIL TAB ================= -->
+            <div id="tab-email" class="tab-content">
+                <h2 class="text-3xl font-bold mb-2">Email Outreach</h2>
+                <p class="text-[var(--text-muted)] text-sm mb-6">Review drafts first or auto-send when you are ready</p>
+
+                <div class="glass-panel p-6 mb-6">
+                    <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-4">Gmail Settings</p>
+                    <p class="text-[var(--text-muted)] text-xs mb-4">Draft mode opens prefilled Gmail drafts for review. Auto Send uses SMTP with your App Password.</p>
+                    <div class="grid grid-cols-3 gap-4 mb-4">
+                        <div>
+                            <label class="block text-[var(--text-muted)] text-xs mb-1">Gmail address</label>
+                            <input type="email" placeholder="you@gmail.com" class="glass-input w-full text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-[var(--text-muted)] text-xs mb-1">App Password</label>
+                            <input type="password" placeholder="xxxx xxxx xxxx xxxx" class="glass-input w-full text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-[var(--text-muted)] text-xs mb-1">Sender name</label>
+                            <input type="text" placeholder="Rahul / Your Agency" class="glass-input w-full text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-6">
+                    <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-4">Sequence Step</p>
+                    <div class="flex gap-3 mb-6">
+                        <button class="text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg" style="background-color: var(--accent);">1 Intro</button>
+                        <button class="glass-button-secondary px-6 py-2 rounded-full text-sm">2 Follow-up</button>
+                        <button class="glass-button-secondary px-6 py-2 rounded-full text-sm">3 Last chance</button>
+                    </div>
+                    <div class="mb-4">
+                        <p class="text-sm mb-2">Mode</p>
+                        <label class="flex items-center gap-2 text-sm mb-1"><input type="radio" name="email-mode" checked class="accent-[var(--accent)]"> Review Drafts (Recommended)</label>
+                        <label class="flex items-center gap-2 text-sm"><input type="radio" name="email-mode" class="accent-[var(--accent)]"> Auto Send</label>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-[var(--text-muted)] text-sm mb-2">Delay between emails (seconds)</label>
+                        <input type="number" value="45" class="glass-input w-32 text-sm">
+                        <p class="text-red-500 dark:text-red-400 text-xs mt-1">Use 30–60 seconds minimum to reduce Gmail flagging risk.</p>
+                    </div>
+                    <div>
+                        <p class="text-sm mb-2">Apply to</p>
+                        <label class="flex items-center gap-2 text-sm mb-1"><input type="radio" name="email-scope" checked class="accent-[var(--accent)]"> Only leads still pending this step</label>
+                        <label class="flex items-center gap-2 text-sm"><input type="radio" name="email-scope" class="accent-[var(--accent)]"> All eligible leads</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= TRACKER TAB ================= -->
+            <div id="tab-tracker" class="tab-content">
+                <h2 class="text-3xl font-bold mb-2">Tracker</h2>
+                <p class="text-[var(--text-muted)] text-sm mb-6">Open this every day to see who needs a reply, what follow-ups are due, and how much revenue is moving</p>
+
+                <div class="grid grid-cols-4 gap-4 mb-6">
+                    <div class="glass-panel p-5">
+                        <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-2">Reply / Follow-Up Today</p>
+                        <p class="text-3xl font-bold text-red-500">0</p>
+                    </div>
+                    <div class="glass-panel p-5">
+                        <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-2">Pipeline Value</p>
+                        <p class="text-3xl font-bold text-yellow-500">₹0</p>
+                    </div>
+                    <div class="glass-panel p-5">
+                        <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-2">Closed Revenue</p>
+                        <p class="text-3xl font-bold text-green-500">₹0</p>
+                    </div>
+                    <div class="glass-panel p-5">
+                        <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-2">Active Leads</p>
+                        <p class="text-3xl font-bold" style="color: var(--accent);">0</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-2 mb-6">
+                    <button class="text-white px-4 py-2 rounded-lg text-sm font-bold shadow-lg" style="background-color: var(--accent);">Today</button>
+                    <button class="glass-button-secondary px-4 py-2 rounded-lg text-sm">Leads</button>
+                    <button class="glass-button-secondary px-4 py-2 rounded-lg text-sm">Calendar</button>
+                    <button class="glass-button-secondary px-4 py-2 rounded-lg text-sm">Pipeline</button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="glass-panel p-6">
+                        <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-4">Today's Follow-Ups</p>
+                        <p class="text-yellow-500 text-sm mb-2">No follow-ups due today</p>
+                        <p class="text-[var(--text-muted)] text-xs mb-4">Today: 0 contacted · 0 replied · 0 closed</p>
+                        <div class="bg-black/10 dark:bg-black/20 border border-[var(--border-panel)] rounded-xl p-4 flex justify-between items-center">
+                            <span class="text-green-500 text-sm">✓ Inbox clear</span>
+                            <span class="text-green-500 text-sm">No replies due today</span>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-6">
+                        <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-4">Quick Actions</p>
+                        <p class="text-[var(--text-muted)] text-xs mb-4">Use Leads page multi-select for bulk updates.</p>
+                        <div class="space-y-2">
+                            <button class="glass-button-secondary w-full text-left">Apply Bulk Stage</button>
+                            <button class="glass-button-secondary w-full text-left text-yellow-500">Set Selected Follow-Up Today</button>
+                            <button class="glass-button-secondary w-full text-left text-cyan-500">Open Message Templates</button>
+                            <button class="glass-button-secondary w-full text-left text-green-500">Quick Add Lead</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= PIPELINE TAB ================= -->
+            <div id="tab-pipeline" class="tab-content">
+                <h2 class="text-3xl font-bold mb-2">Pipeline</h2>
+                <p class="text-[var(--text-muted)] text-sm mb-6">Simple stage tracker for the whole company.</p>
+
+                <div class="grid grid-cols-6 gap-4">
+                    <div class="glass-panel p-4">
+                        <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-2">New</p>
+                        <p class="text-2xl font-bold mb-1">0</p>
+                        <p class="text-[var(--text-muted)] text-xs mb-4">₹0</p>
+                        <p class="text-[var(--text-muted)] text-xs">No leads here yet</p>
+                    </div>
+                    <div class="glass-panel p-4 border-l-4" style="border-color: var(--accent);">
+                        <p class="text-xs font-bold uppercase mb-2" style="color: var(--accent);">Contacted</p>
+                        <p class="text-2xl font-bold mb-1">0</p>
+                        <p class="text-[var(--text-muted)] text-xs mb-4">₹0</p>
+                        <p class="text-[var(--text-muted)] text-xs">No leads here yet</p>
+                    </div>
+                    <div class="glass-panel p-4">
+                        <p class="text-cyan-500 text-xs font-bold uppercase mb-2">Replied</p>
+                        <p class="text-2xl font-bold mb-1">0</p>
+                        <p class="text-[var(--text-muted)] text-xs mb-4">₹0</p>
+                        <p class="text-[var(--text-muted)] text-xs">No leads here yet</p>
+                    </div>
+                    <div class="glass-panel p-4">
+                        <p class="text-yellow-500 text-xs font-bold uppercase mb-2">Interested</p>
+                        <p class="text-2xl font-bold mb-1">0</p>
+                        <p class="text-[var(--text-muted)] text-xs mb-4">₹0</p>
+                        <p class="text-[var(--text-muted)] text-xs">No leads here yet</p>
+                    </div>
+                    <div class="glass-panel p-4">
+                        <p class="text-green-500 text-xs font-bold uppercase mb-2">Closed</p>
+                        <p class="text-2xl font-bold mb-1">0</p>
+                        <p class="text-[var(--text-muted)] text-xs mb-4">₹0</p>
+                        <p class="text-[var(--text-muted)] text-xs">No leads here yet</p>
+                    </div>
+                    <div class="glass-panel p-4">
+                        <p class="text-red-500 text-xs font-bold uppercase mb-2">Lost</p>
+                        <p class="text-2xl font-bold mb-1">0</p>
+                        <p class="text-[var(--text-muted)] text-xs mb-4">₹0</p>
+                        <p class="text-[var(--text-muted)] text-xs">No leads here yet</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= SETTINGS TAB ================= -->
+            <div id="tab-settings" class="tab-content">
+                <h2 class="text-3xl font-bold mb-2">Settings</h2>
+                <p class="text-[var(--text-muted)] text-sm mb-6">Defaults, appearance, danger zone</p>
+
+                <div class="glass-panel p-6 mb-6">
+                    <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-4">Gmail Defaults</p>
+                    <p class="text-[var(--text-muted)] text-xs mb-4">Pre-fills the Email page so you never retype these.</p>
+                    <div class="grid grid-cols-3 gap-4">
+                        <input type="email" placeholder="you@gmail.com" class="glass-input w-full text-sm">
+                        <input type="password" placeholder="xxxx xxxx xxxx xxxx" class="glass-input w-full text-sm">
+                        <input type="text" placeholder="Rahul / Your Agency" class="glass-input w-full text-sm">
+                    </div>
+                </div>
+
+                <div class="glass-panel p-6 mb-6">
+                    <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-4">WhatsApp Defaults</p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[var(--text-muted)] text-xs mb-1">Country code</label>
+                            <input type="text" value="91" class="glass-input w-full text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-[var(--text-muted)] text-xs mb-1">Seconds between messages</label>
+                            <input type="number" value="15" class="glass-input w-full text-sm">
+                        </div>
+                    </div>
+                </div>
+                <div class="glass-panel p-6 mb-6">
+                    <p class="text-[var(--text-muted)] text-xs font-bold uppercase mb-4">Appearance</p>
+                    <p class="text-[var(--text-muted)] text-sm mb-6">Choose your accent color theme and preferred mode.</p>
+                    
+                    <!-- Dark Mode Toggle -->
+                    <div class="flex items-center justify-between mb-8 pb-6 border-b border-[var(--border-panel)]">
+                        <div>
+                            <p class="text-sm font-bold">Dark Mode</p>
+                            <p class="text-xs text-[var(--text-muted)]">Toggle between light and dark interface.</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="dark-mode-toggle" class="sr-only peer" onchange="toggleDarkMode()">
+                            <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-[var(--accent)]"></div>
+                        </label>
+                    </div>
+
+                    <p class="text-[var(--text-muted)] text-sm mb-4">Choose your accent color theme.</p>
+                    <div class="flex gap-4 flex-wrap">
+                        <!-- Blue Theme -->
+                        <button onclick="setTheme('blue')" class="theme-btn flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--border-panel)] hover:border-[var(--accent)] transition-all" data-color="blue">
+                            <div class="w-4 h-4 rounded-full bg-blue-500"></div>
+                            <span class="text-sm font-medium">Blue</span>
+                        </button>
+                        <!-- Pink Theme -->
+                        <button onclick="setTheme('pink')" class="theme-btn flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--border-panel)] hover:border-[var(--accent)] transition-all" data-color="pink">
+                            <div class="w-4 h-4 rounded-full bg-pink-500"></div>
+                            <span class="text-sm font-medium">Pink</span>
+                        </button>
+                        <!-- Green Theme -->
+                        <button onclick="setTheme('green')" class="theme-btn flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--border-panel)] hover:border-[var(--accent)] transition-all" data-color="green">
+                            <div class="w-4 h-4 rounded-full bg-green-500"></div>
+                            <span class="text-sm font-medium">Green</span>
+                        </button>
+                        <!-- White Theme -->
+                        <button onclick="setTheme('white')" class="theme-btn flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--border-panel)] hover:border-[var(--accent)] transition-all" data-color="white">
+                            <div class="w-4 h-4 rounded-full bg-gray-200 border border-gray-400"></div>
+                            <span class="text-sm font-medium">White</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-6 border border-red-500/30">
+                    <p class="text-red-500 text-xs font-bold uppercase mb-4">Danger Zone</p>
+                    <button class="w-full border border-red-500/50 text-red-500 hover:bg-red-500 hover:text-white py-3 rounded-xl text-sm font-bold transition-colors mb-4">Deactivate This Device</button>
+                    <button class="w-full border border-red-500/50 text-red-500 hover:bg-red-500 hover:text-white py-3 rounded-xl text-sm font-bold transition-colors">Clear All Data</button>
+                </div>
+            </div>
+
+            <!-- ================= HISTORY TAB ================= -->
+            <div id="tab-history" class="tab-content">
+                <h2 class="text-3xl font-bold mb-2">History</h2>
+                <p class="text-[var(--text-muted)] text-sm mb-6">Complete audit trail · all actions timestamped</p>
+                <div class="glass-panel p-4 h-[600px] overflow-y-auto font-mono text-sm text-[var(--text-muted)]">
+                    <p>[Ready] System initialized.</p>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- JAVASCRIPT FOR INTERACTIVITY & MOCK DATA -->
+    <script src="js/template-ui.js"></script>
+    <script src="js/template-api-bridge.js?v=2"></script>
+    <script src="js/mobile-navigation.js"></script>
+</body>
+</html>

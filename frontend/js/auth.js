@@ -1,0 +1,1 @@
+document.getElementById('login-form')?.addEventListener('submit',async event=>{event.preventDefault();try{await API.post('/api/auth/login',{email:email.value,password:password.value});location.href='/frontend/pages/dashboard.html'}catch(error){document.getElementById('login-message').textContent=error.message}});

@@ -1,0 +1,68 @@
+/* Responsive layer for the supplied ReachPilot template. */
+html, body { min-width: 0; }
+#app-view > main { min-width: 0; }
+.mobile-menu-toggle, .mobile-menu-backdrop { display: none; }
+
+@media (max-width: 1024px) {
+    #app-view > aside { width: 13.5rem; margin: .75rem; }
+    #app-view > main { padding: 1.5rem; }
+    #app-view .grid-cols-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 900px) {
+    .mobile-menu-toggle {
+        display: inline-flex; position: fixed; top: .9rem; left: .9rem; z-index: 60;
+        width: 3rem; height: 3rem; align-items: center; justify-content: center; flex-direction: column;
+        gap: .28rem; border: 1px solid var(--border-panel); border-radius: .8rem; background: rgba(17,24,39,.9);
+        box-shadow: 0 8px 24px rgba(0,0,0,.25); backdrop-filter: blur(16px); cursor: pointer;
+    }
+    .mobile-menu-toggle span { display: block; width: 1.25rem; height: 2px; border-radius: 2px; background: var(--text-main); transition: transform .25s ease, opacity .2s ease; }
+    .mobile-menu-backdrop { position: fixed; inset: 0; z-index: 39; background: rgba(0,0,0,.48); opacity: 0; pointer-events: none; transition: opacity .25s ease; }
+    body.mobile-menu-open .mobile-menu-backdrop { display: block; opacity: 1; pointer-events: auto; }
+    body.mobile-menu-open .mobile-menu-toggle span:nth-child(1) { transform: translateY(.4rem) rotate(45deg); }
+    body.mobile-menu-open .mobile-menu-toggle span:nth-child(2) { opacity: 0; }
+    body.mobile-menu-open .mobile-menu-toggle span:nth-child(3) { transform: translateY(-.4rem) rotate(-45deg); }
+    body { overflow: auto !important; }
+    #app-view { display: block !important; height: auto !important; min-height: 100dvh; overflow: visible !important; }
+    #app-view > aside {
+        position: fixed; top: .75rem; bottom: .75rem; left: .75rem; width: min(18rem, calc(100vw - 1.5rem)); height: auto; margin: 0;
+        z-index: 50; border-radius: 1rem; flex-direction: column !important; align-items: stretch;
+        overflow: hidden; transform: translateX(calc(-100% - 1.5rem)); transition: transform .28s ease;
+    }
+    body.mobile-menu-open #app-view > aside { transform: translateX(0); }
+    #app-view > aside > div:first-child { flex: 0 0 auto; padding: 1.25rem; border-bottom: 1px solid var(--border-panel); }
+    #app-view > aside nav {
+        display: block !important; flex: 1 1 auto !important; gap: 0; padding: .8rem !important;
+        overflow-y: auto !important; overflow-x: hidden !important; white-space: normal;
+    }
+    #app-view > aside nav .sidebar-item { width: 100% !important; padding: .72rem .85rem !important; border-left: 0; margin-bottom: .2rem; }
+    #app-view > aside nav .sidebar-item.active { border-left: 4px solid white; border-bottom: 0; }
+    #app-view > aside > div:last-child { display: block; }
+    #app-view > main { overflow: visible !important; padding: 5rem 1rem 1rem !important; }
+    #app-view > main > div:first-child { flex-wrap: wrap; gap: 1rem; }
+    #app-view h2 { font-size: 1.55rem !important; line-height: 1.25; }
+    #app-view .grid-cols-6 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: .75rem !important; }
+    #app-view .grid-cols-3, #app-view .grid-cols-2 { grid-template-columns: 1fr !important; }
+    #app-view .lg\:grid-cols-2, #app-view .md\:grid-cols-2 { grid-template-columns: 1fr !important; }
+    #app-view .p-6 { padding: 1rem; }
+    #app-view .p-5 { padding: .9rem; }
+    #app-view .p-4 { padding: .85rem; }
+    #app-view .text-3xl { font-size: 1.55rem; }
+    #app-view .overflow-x-auto { margin-inline: -.2rem; }
+    #app-view .glass-panel.overflow-hidden { overflow-x: auto !important; }
+    #app-view .flex.gap-3.mb-4,
+    #app-view .flex.justify-between.items-center,
+    #app-view .flex.justify-between.items-start { flex-wrap: wrap; gap: .75rem; }
+    #app-view .flex.gap-3.mb-4 > .glass-input.flex-1 { flex-basis: 100%; }
+    #app-view .flex.gap-2 { flex-wrap: wrap; }
+    #app-view table { min-width: 650px; }
+    #auth-view { padding: 1rem; align-items: flex-start; overflow-y: auto; }
+    #auth-view .max-w-md { margin-block: 1rem; padding: 1.5rem; }
+}
+
+@media (max-width: 420px) {
+    #app-view > main { padding: .75rem !important; }
+    #app-view .glass-button-primary { width: 100%; text-align: center; }
+    #app-view .grid-cols-6 { grid-template-columns: 1fr !important; }
+    #app-view .flex.justify-between { align-items: flex-start; }
+}
