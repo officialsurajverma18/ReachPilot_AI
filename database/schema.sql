@@ -1,0 +1,54 @@
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL UNIQUE,
+  password_hash TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS businesses (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  place_id TEXT UNIQUE,
+  name TEXT NOT NULL,
+  category TEXT,
+  location TEXT,
+  address TEXT,
+  phone TEXT,
+  email TEXT,
+  website TEXT,
+  maps_url TEXT,
+  rating REAL,
+  review_count INTEGER DEFAULT 0,
+  source_query TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS leads (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  business_id INTEGER NOT NULL UNIQUE,
+  status TEXT NOT NULL DEFAULT 'New',
+  priority TEXT NOT NULL DEFAULT 'Medium',
+  score INTEGER DEFAULT 0,
+  score_factors TEXT DEFAULT '[]',
+  notes TEXT DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(business_id) REFERENCES businesses(id)
+);
+CREATE TABLE IF NOT EXISTS communications (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  lead_id INTEGER NOT NULL,
+  channel TEXT NOT NULL,
+  subject TEXT,
+  message TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'draft',
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(lead_id) REFERENCES leads(id)
+);
+CREATE TABLE IF NOT EXISTS followups (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  lead_id INTEGER NOT NULL,
+  due_at TEXT NOT NULL,
+  note TEXT,
+  status TEXT NOT NULL DEFAULT 'pending',
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(lead_id) REFERENCES leads(id)
+);

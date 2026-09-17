@@ -45,3 +45,8 @@ def test_production_license_guard_blocks_discovery_without_an_active_key():
     app = create_app({"TESTING": True, "SQLITE_PATH": str(path), "SECRET_KEY": "test", "REQUIRE_LICENSE": True})
     response = app.test_client().post("/api/businesses/search", json={"keyword": "Agency", "location": "Kanpur"})
     assert response.status_code == 403
+
+
+def test_wsgi_application_is_exposed_for_gunicorn():
+    from backend.app import app
+    assert app is not None

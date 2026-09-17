@@ -25,8 +25,15 @@
     }
     async function postJson(path, body) {
         const response = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || 'Request failed.');
+        const contentType = response.headers.get('content-type') || '';
+        let data = {};
+        if (contentType.includes('application/json')) {
+            try { data = await response.json(); } catch (_) { data = {}; }
+        }
+        if (!response.ok) {
+            if (response.status >= 500) throw new Error('The service is temporarily unavailable. Please try again later.');
+            throw new Error(data.error || 'The request could not be completed. Please try again.');
+        }
         return data;
     }
     async function findAndFillKey() {
